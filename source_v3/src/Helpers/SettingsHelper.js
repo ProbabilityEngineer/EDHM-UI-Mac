@@ -787,7 +787,7 @@ async function installEDHMmod(gameInstance) {
 
     // #region Un-Zipping Mod Files
 
-    const edhmZipFile = await fileHelper.findFileWithPattern(AssetsPath, `${GameType}_EDHM-v*.zip`); //<- ODYSS_EDHM-v22.01.zip
+    const edhmZipFile = await fileHelper.findFileWithPattern(AssetsPath, `${GameType}_EDHM-v*.zip`); //<- ODYSS_EDHM-v22.02.zip
     if (edhmZipFile) {
       console.log('Unzipping Mod Files from: ', edhmZipFile);
       const unzipGamePath = gamePath;
@@ -960,28 +960,44 @@ async function ToggleEDHMmod(gameInstance) {
   }
 
   const disabling = status.state === 'ready';
-  const pairs = [];
+  const renamePairs = [];
   for (const { enabled, disabled } of EDHM_DLL_FILES) {
     const enabledPath = path.join(status.gamePath, enabled);
     const disabledPath = path.join(status.gamePath, disabled);
-    pairs.push({
-      sourcePath: disabling ? enabledPath : disabledPath,
-      destinationPath: disabling ? disabledPath : enabledPath,
-    });
+    // A mixed disabled pair is recoverable: restore only the DLL that still
+    // has the .disabled suffix, leaving its already-enabled counterpart intact.
+    if (disabling || await fileExists(disabledPath)) {
+      renamePairs.push({
+        sourcePath: disabling ? enabledPath : disabledPath,
+        destinationPath: disabling ? disabledPath : enabledPath,
+      });
+    }
   }
 
-  const completed = [];
+  const completedRenames = [];
   try {
-    for (const pair of pairs) {
-      await rename(pair.sourcePath, pair.destinationPath);
-      completed.push(pair);
+    for (const renamePair of renamePairs) {
+      await rename(renamePair.sourcePath, renamePair.destinationPath);
+      completedRenames.push(renamePair);
     }
   } catch (error) {
-    for (const pair of completed.reverse()) {
-      try { await rename(pair.destinationPath, pair.sourcePath); } catch {}
+    const rollbackErrors = [];
+    for (const renamePair of completedRenames.reverse()) {
+      try {
+        await rename(renamePair.destinationPath, renamePair.sourcePath);
+      } catch (rollbackError) {
+        rollbackErrors.push(rollbackError);
+      }
     }
     const action = disabling ? 'disable' : 'enable';
-    throw new Error(`Unable to ${action} EDHM: ${error.message}. Ensure Elite Dangerous is not running and that the game folder is writable.`);
+    const rollbackMessage = rollbackErrors.length > 0
+      ? ' One or more DLLs could not be restored; reinstall EDHM to repair the matching state.'
+      : '';
+    throw new Error(
+      `Unable to ${action} EDHM: ${error.message}. ` +
+      'Ensure Elite Dangerous is not running and that the game folder is writable.' +
+      rollbackMessage
+    );
   }
   return { ...(await GetEDHMStatus(gameInstance)), changed: true };
 }
