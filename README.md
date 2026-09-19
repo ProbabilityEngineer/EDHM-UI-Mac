@@ -1,14 +1,16 @@
 # EDHM-UI-Mac
 
-A macOS-native build of [EDHM-UI](https://github.com/BlueMystical/EDHM_UI), the configuration and theme manager for [EDHM](https://github.com/psychicEgg/EDHM) in Elite Dangerous.
+EDHM-UI-Mac is an independent macOS/CrossOver fork of [EDHM-UI](https://github.com/BlueMystical/EDHM_UI), the configuration and theme manager for [EDHM](https://github.com/psychicEgg/EDHM) in Elite Dangerous.
 
-This fork is intended for **macOS users running the Windows game through CrossOver**. EDHM-UI-Mac itself runs natively on macOS; it is not installed or run inside the Wine prefix (CrossOver bottle).
+It is intended for **macOS users running the Windows game through CrossOver**. EDHM-UI-Mac itself runs natively on macOS; it is not installed or run inside the Wine prefix (CrossOver bottle). It is not an official upstream macOS release.
+
+![EDHM-UI-Mac running natively on macOS](static/preview.jpg)
 
 ## Release parity and provenance
 
-This build is based on upstream EDHM-UI **v3.0.70** and bundles the Odyssey EDHM payload **v22.01**. It retains the upstream Windows application behavior while adding macOS/CrossOver support for paths, installation, themes, TPMods, and packaging.
+The current macOS build is based on upstream EDHM-UI **v3.0.70** and bundles the Odyssey EDHM payload **v22.02**. It retains upstream Windows behavior where compatible while adding macOS/CrossOver support for paths, installation, themes, TPMods, and signed/notarized packaging.
 
-The macOS work is maintained in the [`main`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/main) branch. It is a fork/adaptation, not an official upstream macOS release. Upstream project and mod credits remain with [Blue Mystic](https://github.com/BlueMystical), [psychicEgg](https://github.com/psychicEgg), and the EDHM contributors.
+The product branch is [`macos`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/macos); [`main`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/main) mirrors upstream EDHM-UI. This repository is a fork/adaptation, not an official upstream macOS release. Upstream project and mod credits remain with [Blue Mystic](https://github.com/BlueMystical), [psychicEgg](https://github.com/psychicEgg), and the EDHM contributors.
 
 ## Download
 
@@ -17,7 +19,7 @@ Download the ZIP for your Mac from the [GitHub Releases](https://github.com/Prob
 - **Universal** — Apple Silicon and Intel Macs (recommended)
 - **arm64** — Apple Silicon Macs
 
-The app is ad-hoc signed. If macOS blocks the first launch, Control-click the app, choose **Open**, and confirm.
+Releases are Developer ID signed, Apple-notarized, and stapled. After unzipping, move the app to Applications and open it normally in Finder.
 
 ## Requirements
 
