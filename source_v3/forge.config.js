@@ -36,6 +36,15 @@ const packagerConfig = {
       "requested-execution-level": "highestAvailable"
     }
   } : {}),
+  ...(isMac ? {
+    osxSign: {
+      identity: 'Developer ID Application: Samuel Collins (KYS7QZNSJH)',
+      entitlements: path.join(__dirname, 'entitlements.mac.plist'),
+      'entitlements-inherit': path.join(__dirname, 'entitlements.mac.plist'),
+      preAutoEntitlements: false,
+      hardenedRuntime: true,
+    },
+  } : {}),
 };
 
 const makers = [
