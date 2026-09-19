@@ -1059,3 +1059,7 @@ source_v3/src/data/ODYSS/ODYSS_EDHM-v21.09.zip
 # CLU local runtime state.
 .clu/*.sqlite*
 .clu/backups/
+
+# Local screenshot captures; README artwork lives at static/preview.jpg.
+/Screenshot *.png
+/edhm-ui-mac-screenshot.png
