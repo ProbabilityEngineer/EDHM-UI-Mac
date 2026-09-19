@@ -6,6 +6,8 @@ It is intended for **macOS users running the Windows game through CrossOver**. E
 
 ![EDHM-UI-Mac running natively on macOS](static/preview.jpg)
 
+> **Using EDHM with CrossOver Preview on Apple Silicon?** [Download the experimental ARM64EC DXMT package.](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-7c8dee1) It is for ARM/FEX bottles and installs into a separate CrossOver app copy.
+
 ## Release parity and provenance
 
 The current macOS build is based on upstream EDHM-UI **v3.0.70** and bundles the Odyssey EDHM payload **v22.02**. It retains upstream Windows behavior where compatible while adding macOS/CrossOver support for paths, installation, themes, TPMods, and signed/notarized packaging.
@@ -81,10 +83,6 @@ EDHM-UI-Mac can configure these from the EDHM DLL override control in Settings. 
 
 The tested working renderer is **DXMT**. D3DMetal may launch Elite, but EDHM themes did not apply reliably and could crash in the tested bottle. Steam/Epic launcher combinations and other CrossOver bottles still need separate validation.
 
-## Experimental ARM64EC DXMT package
-
-For Apple Silicon CrossOver ARM/FEX bottles using EDHM/3Dmigoto, an experimental upstream-DXMT ARM64EC prerelease is available. It installs into a **separate CrossOver app copy** and does not replace bottle or global CrossOver DXMT files. See [experimental ARM64EC DXMT instructions](docs/DXMT_ARM64EC_EDHM.md).
-
 ## Using themes and TPMods
 
 - Start Elite and leave it at the menus when testing setup.
@@ -140,3 +138,26 @@ npx -y -p node@22 -c 'npm run make'
 ## License
 
 This project remains licensed under [GPL-3.0+](license.txt).
+
+## CrossOver Preview ARM64EC DXMT for EDHM (experimental)
+
+This optional [DXMT ARM64EC prerelease](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-7c8dee1) is for Apple Silicon users running Elite through a CrossOver Preview ARM/FEX bottle with EDHM/3Dmigoto. It packages an unmodified upstream DXMT build with ARM64EC-compatible hook entry points. It was tested only with Elite Dangerous Odyssey + EDHM on CrossOver Preview, so it is not an official or general compatibility guarantee.
+
+It does **not** replace DXMT files in your bottle or your installed CrossOver app. Instead, its installer creates a separate app copy in `~/Applications` with the matched Windows and Unix DXMT modules.
+
+### Install and use it
+
+1. Fully quit Elite and CrossOver.
+2. Download [`dxmt-arm64ec-edhm-crossover-7c8dee1.zip`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-7c8dee1) and optionally verify it with the accompanying `.sha256` file.
+3. Unzip it and run:
+
+   ```bash
+   cd dxmt-arm64ec-edhm-crossover-7c8dee1
+   ./install-dxmt-arm64ec-crossover.sh "/Applications/CrossOver Preview.app"
+   ```
+
+4. Launch your existing ARM bottle using the new `CrossOver Preview DXMT 7c8dee1 ARM64EC.app` copy in `~/Applications`.
+5. For native Retina resolution reporting, import the included `enable-wine-retina-mode.reg` into that bottle, then restart the bottle.
+6. Ensure the EDHM bottle overrides remain `d3d11=native,builtin` and `d3dcompiler_47=native,builtin`.
+
+To roll back, quit CrossOver and delete the copied DXMT CrossOver app; the original CrossOver installation and bottle DLLs are unchanged. See [the full package instructions](docs/DXMT_ARM64EC_EDHM.md) for requirements, provenance, troubleshooting, and rollback details.
