@@ -1054,3 +1054,8 @@ source_v3/src/data/ODYSS/ODYSS_EDHM-Themes.zip
 source_v3/src/data/ODYSS/ODYSS_EDHM-v21.05.zip
 source_v3/src/data/ODYSS/ODYSS_EDHM-v21.09.zip
 .turnlog/
+
+# CLU shareable configuration and workflow templates remain tracked.
+# CLU local runtime state.
+.clu/*.sqlite*
+.clu/backups/
