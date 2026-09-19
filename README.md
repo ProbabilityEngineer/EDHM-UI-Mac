@@ -145,6 +145,8 @@ This optional [DXMT ARM64EC prerelease](https://github.com/ProbabilityEngineer/E
 
 It does **not** replace DXMT files in your bottle or your installed CrossOver app. Instead, its installer creates a separate app copy in `~/Applications` with the matched Windows and Unix DXMT modules.
 
+This is a temporary solution as the fix is already in dxmt upstream. You could also just pull dxgi.dll out of this package and use it as an override in your elite bottle.
+
 ### Install and use it
 
 1. Fully quit Elite and CrossOver.
