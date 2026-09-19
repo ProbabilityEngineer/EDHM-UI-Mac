@@ -259,6 +259,7 @@ export default {
       gameMenuItems: [],
       edhmInstalled: null,
       edhmStatus: null,
+      initialEdhmStatusChecked: false,
 
       showProgressBar: false,
       progressValue: 0,
@@ -338,14 +339,33 @@ export default {
         if (!this.ActiveInstance?.path) {
           this.edhmInstalled = false;
           this.edhmStatus = { state: 'not_installed' };
-          return;
+          return this.edhmStatus;
         }
         this.edhmStatus = await window.api.GetEDHMStatus(JSON.parse(JSON.stringify(this.ActiveInstance)));
         this.edhmInstalled = this.edhmStatus?.state === 'ready';
+        return this.edhmStatus;
       } catch (error) {
         console.warn('Could not determine EDHM install state:', error);
         this.edhmInstalled = null;
         this.edhmStatus = null;
+        return null;
+      }
+    },
+    showInitialEdhmStatusWarning(status) {
+      if (this.initialEdhmStatusChecked) return;
+      this.initialEdhmStatusChecked = true;
+      if (status?.conflict) {
+        EventBus.emit('RoastMe', {
+          type: 'Error',
+          title: 'EDHM Installation Needs Attention',
+          message: 'One or more EDHM DLL files are missing or duplicated. Reinstall EDHM before enabling or disabling it.',
+        });
+      } else if (status?.state === 'disabled') {
+        EventBus.emit('RoastMe', {
+          type: 'Warning',
+          title: 'EDHM Disabled',
+          message: 'Enable EDHM before launching Elite Dangerous to load custom themes.',
+        });
       }
     },
     async OnInitialize(settings) {
@@ -353,7 +373,8 @@ export default {
         console.log('Initializing NavBars..');
 
         await this.hydrateFooterState(settings);
-        await this.refreshEdhmInstallState();
+        const initialEdhmStatus = await this.refreshEdhmInstallState();
+        this.showInitialEdhmStatusWarning(initialEdhmStatus);
 
         if (this.ActiveInstance?.key) {
           this.DATA_DIRECTORY = await window.api.GetInstanceDataDirectory(this.ActiveInstance.key); //<- Returns the path to the EDHM data directory.
