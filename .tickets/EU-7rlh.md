@@ -1,6 +1,6 @@
 ---
 id: EU-7rlh
-status: in_progress
+status: closed
 deps: []
 links: []
 created: 2026-09-03T23:52:47Z

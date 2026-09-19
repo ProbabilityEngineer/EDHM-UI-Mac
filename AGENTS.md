@@ -26,12 +26,15 @@ These instructions apply to the entire `EDHM_UI` repo.
 - Use precise text edits for complex multi-line changes.
 - For packaged Electron output, edit source files first and rebuild rather than patching packaged artifacts directly.
 
-## Tickets
+## Work tracking with clu
 
-- Use tk tickets for non-trivial feature, fix, packaging, or workflow work.
-- Continue using the existing repo ticket flow under `.tickets/`.
-- Ticket actions may modify `.tickets/` but should not touch code unless the task requires it.
-- Keep ticket notes concise and outcome-focused: what changed, why, and what remains.
+- Use `clu` as the authoritative source for tasks, notes, dependencies, and work state.
+- At the start of substantial work, run `clu ready`; claim the relevant issue with `clu claim <id>` when one exists, then read it with `clu show <id>`.
+- Put newly discovered work, decisions, blockers, and follow-up tasks in `clu` using `clu note`, `clu update`, or `clu create` rather than Markdown todo lists.
+- Keep dependencies accurate with `clu dep`/`clu link`.
+- Close completed issues with `clu close <id>` only after validation. Leave incomplete or blocked work open and record the reason in `clu`.
+- Do not use the retired `tk` workflow or create new ticket records under `.tickets/`; preserve any existing `.tickets/` files as historical data.
+- Treat `.clu/config.yaml` and `.clu/templates/` as portable project configuration. Keep `.clu/data.sqlite`, WAL/SHM files, backups, and other mutable local state out of commits.
 
 ## Turnlog
 
@@ -39,18 +42,12 @@ These instructions apply to the entire `EDHM_UI` repo.
 - Before final VCS publication of a coherent change, record what changed, validation performed, and any ticket touched.
 - Keep `.turnlog/` out of GitHub unless this repo explicitly chooses to track it.
 
-## Jujutsu and Git
+## Git version control
 
-- Use `jj` for local VCS work: `jj status`, `jj diff`, `jj log`, `jj describe -m "message"`, `jj new --no-edit`, `jj op log`, and `jj undo`.
-- Use Git only for remote interoperability.
-- Do not use staged-index workflows like `git add`, `git commit`, `git diff --cached`, or `git pull --rebase`.
-- Before starting work, inspect `jj status`.
-- After a coherent agent-owned change, run `jj describe -m "message"` and `jj new --no-edit`.
-- Keep `@` empty when a change is complete; the finished work should sit in `@-`.
-- Before declaring work pushed, verify the target bookmark, `main@git`, and `main@origin` point to `@-`, and Git HEAD is attached to `main`.
-- If `jj new --no-edit` leaves `@` on completed work, switch to the empty child before moving a bookmark.
-- Use clear `jj describe` messages because they are part of the working record for this repo.
-- Prefer `/jj-align-push [branch]` for final alignment/publishing when requested.
+- Use standard Git workflows; Git is the repository's VCS.
+- Before editing, inspect `git status` and preserve pre-existing modifications. Before committing, inspect `git diff`, `git diff --check`, and the complete staged diff.
+- Keep commits focused and use descriptive commit messages. Do not rewrite history, force-push, or push unrelated changes.
+- Push only the intended branch and only when explicitly requested or when the task's workflow requires it.
 
 
 ## Remote layout

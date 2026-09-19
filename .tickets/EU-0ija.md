@@ -1,6 +1,6 @@
 ---
 id: EU-0ija
-status: in_progress
+status: closed
 deps: []
 links: []
 created: 2026-06-20T05:37:54Z
