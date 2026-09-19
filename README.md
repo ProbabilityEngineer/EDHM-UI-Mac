@@ -81,6 +81,10 @@ EDHM-UI-Mac can configure these from the EDHM DLL override control in Settings. 
 
 The tested working renderer is **DXMT**. D3DMetal may launch Elite, but EDHM themes did not apply reliably and could crash in the tested bottle. Steam/Epic launcher combinations and other CrossOver bottles still need separate validation.
 
+## Experimental ARM64EC DXMT package
+
+For Apple Silicon CrossOver ARM/FEX bottles using EDHM/3Dmigoto, an experimental upstream-DXMT ARM64EC prerelease is available. It installs into a **separate CrossOver app copy** and does not replace bottle or global CrossOver DXMT files. See [experimental ARM64EC DXMT instructions](docs/DXMT_ARM64EC_EDHM.md).
+
 ## Using themes and TPMods
 
 - Start Elite and leave it at the menus when testing setup.
