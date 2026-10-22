@@ -6,11 +6,11 @@ It is intended for **macOS users running the Windows game through CrossOver**. E
 
 ![EDHM-UI-Mac running natively on macOS](static/preview.jpg)
 
-> **Using EDHM with CrossOver Preview on Apple Silicon?** [Download the experimental ARM64EC DXMT package.](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-7c8dee1) It is for ARM/FEX bottles and installs into a separate CrossOver app copy.
+> **Using EDHM with CrossOver Preview on Apple Silicon?** [Download the experimental ARM64EC DXMT package.](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-50102f99-nvext) It is for ARM/FEX bottles and installs into a separate CrossOver app copy.
 
 ## Release parity and provenance
 
-The current macOS build is based on upstream EDHM-UI **v3.0.70** and bundles the Odyssey EDHM payload **v22.02**. It retains upstream Windows behavior where compatible while adding macOS/CrossOver support for paths, installation, themes, TPMods, and signed/notarized packaging.
+The **3.1.4 test prerelease** selectively integrates upstream EDHM-UI fixes reviewed through commit `b31f65a` (v3.0.74 era) and bundles Odyssey EDHM **v22.04** for the Anaconda Mk II game update. Stable **3.1.3** remains available with EDHM v22.02. macOS/CrossOver paths, themes, TPMods, native UI, and signed/notarized packaging are preserved.
 
 The product branch is [`macos`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/macos); [`main`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/main) mirrors upstream EDHM-UI. This repository is a fork/adaptation, not an official upstream macOS release. Upstream project and mod credits remain with [Blue Mystic](https://github.com/BlueMystical), [psychicEgg](https://github.com/psychicEgg), and the EDHM contributors.
 
@@ -20,6 +20,7 @@ Download the ZIP for your Mac from the [GitHub Releases](https://github.com/Prob
 
 - **Universal** — Apple Silicon and Intel Macs (recommended)
 - **arm64** — Apple Silicon Macs
+- **x64** — Intel Macs (Intel hardware testing remains separate)
 
 Releases are Developer ID signed, Apple-notarized, and stapled. After unzipping, move the app to Applications and open it normally in Finder.
 
@@ -141,24 +142,24 @@ This project remains licensed under [GPL-3.0+](license.txt).
 
 ## CrossOver Preview ARM64EC DXMT for EDHM (experimental)
 
-This optional [DXMT ARM64EC prerelease](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-7c8dee1) is for Apple Silicon users running Elite through a CrossOver Preview ARM/FEX bottle with EDHM/3Dmigoto. It packages an unmodified upstream DXMT build with ARM64EC-compatible hook entry points. It was tested only with Elite Dangerous Odyssey + EDHM on CrossOver Preview, so it is not an official or general compatibility guarantee.
+This optional [DXMT ARM64EC prerelease](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-50102f99-nvext) is for Apple Silicon users running Elite through a CrossOver Preview ARM/FEX bottle with EDHM/3Dmigoto. It packages unmodified upstream DXMT `50102f99` with NVAPI/NGX enabled. The maintainer reports this build working; it remains experimental, not an official or general compatibility guarantee.
 
 It does **not** replace DXMT files in your bottle or your installed CrossOver app. Instead, its installer creates a separate app copy in `~/Applications` with the matched Windows and Unix DXMT modules.
 
-This is a temporary solution as the fix is already in dxmt upstream. You could also just pull dxgi.dll out of this package and use it as an override in your elite bottle.
+Use the matched Windows and Unix modules supplied by the installer. A DXGI-only override is not the supported deployment for this package. Never overwrite EDHM's game-local `d3d11.dll` with DXMT's DLL. The native UI and DXMT are separate downloads.
 
 ### Install and use it
 
 1. Fully quit Elite and CrossOver.
-2. Download [`dxmt-arm64ec-edhm-crossover-7c8dee1.zip`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-7c8dee1) and optionally verify it with the accompanying `.sha256` file.
+2. Download [`dxmt-arm64ec-edhm-crossover-50102f99-nvext.zip`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-50102f99-nvext) and verify it with the accompanying `.sha256` file.
 3. Unzip it and run:
 
    ```bash
-   cd dxmt-arm64ec-edhm-crossover-7c8dee1
+   cd dxmt-arm64ec-edhm-crossover-50102f99-nvext
    ./install-dxmt-arm64ec-crossover.sh "/Applications/CrossOver Preview.app"
    ```
 
-4. Launch your existing ARM bottle using the new `CrossOver Preview DXMT 7c8dee1 ARM64EC.app` copy in `~/Applications`.
+4. Launch your existing ARM bottle using the new `CrossOver Preview DXMT 50102f99 ARM64EC NVEXT.app` copy in `~/Applications`.
 5. For native Retina resolution reporting, import the included `enable-wine-retina-mode.reg` into that bottle, then restart the bottle.
 6. Ensure the EDHM bottle overrides remain `d3d11=native,builtin` and `d3dcompiler_47=native,builtin`.
 
