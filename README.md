@@ -10,7 +10,7 @@ It is intended for **macOS users running the Windows game through CrossOver**. E
 
 ## Release parity and provenance
 
-The **3.1.4 test prerelease** selectively integrates upstream EDHM-UI fixes reviewed through commit `b31f65a` (v3.0.74 era) and bundles Odyssey EDHM **v22.04** for the Anaconda Mk II game update. Stable **3.1.3** remains available with EDHM v22.02. macOS/CrossOver paths, themes, TPMods, native UI, and signed/notarized packaging are preserved.
+The **[3.1.4 release](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/macos-v3.1.4)** selectively integrates upstream EDHM-UI fixes reviewed through commit `b31f65a` (v3.0.74 era) and bundles Odyssey EDHM **v22.04** for the Anaconda Mk II game update. Version **3.1.3** remains available with EDHM v22.02 for rollback. macOS/CrossOver paths, themes, TPMods, native UI, and signed/notarized packaging are preserved.
 
 The product branch is [`macos`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/macos); [`main`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/main) mirrors upstream EDHM-UI. This repository is a fork/adaptation, not an official upstream macOS release. Upstream project and mod credits remain with [Blue Mystic](https://github.com/BlueMystical), [psychicEgg](https://github.com/psychicEgg), and the EDHM contributors.
 
