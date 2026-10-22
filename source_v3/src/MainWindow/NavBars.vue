@@ -167,6 +167,10 @@
           </div>
         </div>
 
+        <span id="lblEDHMStatus" class="navbar-text mx-2 text-nowrap"
+          :class="edhmStatusDisplay.className" :title="edhmStatusDisplay.detail" role="status">
+          {{ edhmStatusDisplay.label }}
+        </span>
         <!-- App Version Label -->
         <span class="navbar-text mx-3" id="lblVersion">App Version: {{ appVersion }}</span>
         <!-- Mod Version Label -->
@@ -201,6 +205,7 @@
 <script>
 import { ref } from 'vue';
 import EventBus from '../EventBus';
+import { getEdhmStatusDisplay } from '../Helpers/EdhmStatusDisplay.js';
 import ThemeTab from './ThemeTab.vue';
 import Util from '../Helpers/Utils.js';
 import HUD_Areas from './HudImage.vue';
@@ -285,6 +290,9 @@ export default {
     GlobalSettingsTab
   },
   computed: {
+    edhmStatusDisplay() {
+      return getEdhmStatusDisplay(this.edhmStatus);
+    },
     edhmToggleMenuLabel() {
       if (this.edhmStatus?.state === 'ready') return 'Disable EDHM';
       if (this.edhmStatus?.state === 'disabled') return 'Enable EDHM';
@@ -294,7 +302,7 @@ export default {
       return 'Enable/Disable EDHM';
     },
     showInstallMenuOption() {
-      return this.edhmStatus === null || this.edhmStatus?.state === 'not_installed';
+      return this.edhmStatus === null || this.edhmStatus?.conflict || this.edhmStatus?.state === 'not_installed';
     },
     showUninstallMenuOption() {
       return this.edhmStatus === null || ['ready', 'disabled'].includes(this.edhmStatus?.state);
