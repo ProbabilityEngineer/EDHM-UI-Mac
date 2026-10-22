@@ -22,6 +22,11 @@ Download the ZIP for your Mac from the [GitHub Releases](https://github.com/Prob
 - **arm64** — Apple Silicon Macs
 - **x64** — Intel Macs (Intel hardware testing remains separate)
 
+The refreshed 3.1.4 **arm64 and universal** downloads include the audit follow-up
+fixes and graceful handling of missing EDHM settings (source `f47e401`).
+The standalone x64 download remains the original 3.1.4 build; choose universal
+on Intel to get these fixes.
+
 Releases are Developer ID signed, Apple-notarized, and stapled. After unzipping, move the app to Applications and open it normally in Finder.
 
 ## Requirements
