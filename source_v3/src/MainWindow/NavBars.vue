@@ -39,7 +39,7 @@
           <div class="input-group mb-3">
 
             <button id="cmdAddNewTheme" class="btn btn-outline-secondary" type="button" data-bs-toggle="tooltip"
-              data-bs-placement="bottom" data-bs-title="Add New Theme" @mousedown="addNewTheme_Click">
+              data-bs-placement="bottom" data-bs-title="Add New Theme" @click="addNewTheme_Click" :disabled="newThemeConfirmationPending">
               <i class="bi bi-plus-circle"></i>
             </button>
             <button id="cmdEditTheme" class="btn btn-outline-secondary" type="button" data-bs-toggle="tooltip"
@@ -174,7 +174,8 @@
         <!-- App Version Label -->
         <span class="navbar-text mx-3" id="lblVersion">App Version: {{ appVersion }}</span>
         <!-- Mod Version Label -->
-        <span class="navbar-text mx-3" id="lblModVersion">EDHM Version: {{ modVersion }}</span>
+        <span class="navbar-text mx-3" id="lblModVersion"
+          title="EDHM version bundled with this app for the selected game. Install EDHM to update the game files.">EDHM Version: {{ modVersion }}</span>
 
         <!-- Progress bar-->
         <span v-show="showProgressBar" class="progress" role="progressbar" aria-label="Warning example"
@@ -265,6 +266,7 @@ export default {
       edhmInstalled: null,
       edhmStatus: null,
       initialEdhmStatusChecked: false,
+      newThemeConfirmationPending: false,
 
       showProgressBar: false,
       progressValue: 0,
@@ -343,6 +345,8 @@ export default {
       }
     },
     async refreshEdhmInstallState() {
+      const gameType = this.ActiveInstance?.key === 'ED_Horizons' ? 'HORIZ' : 'ODYSS';
+      this.modVersion = this.programSettings[`Version_${gameType}`] || '';
       try {
         if (!this.ActiveInstance?.path) {
           this.edhmInstalled = false;
@@ -438,7 +442,7 @@ export default {
           this.currentSettingsPath = template.credits.theme === 'Current Settings' ? template.path : '';
           console.log('Loaded Theme:', this.themeTemplate);
           EventBus.emit('ThemeLoaded', JSON.parse(JSON.stringify(this.themeTemplate)));
-          this.statusText = 'Theme: ' + theme.name;
+          this.statusText = 'Selected Theme: ' + theme.name;
           return true;
         }
         return false;
@@ -655,6 +659,9 @@ export default {
       }
     },
     async addNewTheme_Click(event) {
+      if (this.newThemeConfirmationPending) return;
+      this.newThemeConfirmationPending = true;
+      try {
       const options = {
         type: 'question', //<- none, info, error, question, warning
         buttons: ['Cancel', 'Yes, I am sure', 'No, take me back'],
@@ -667,6 +674,9 @@ export default {
       const result = await window.api.ShowMessageBox(options); //console.log(result);
       if (result && result.response === 1) {
         EventBus.emit('OnCreateTheme', { theme: null }); //<- Event Listened on App.vue
+      }
+      } finally {
+        this.newThemeConfirmationPending = false;
       }
     },
     async editTheme_Click(event) {
@@ -985,6 +995,7 @@ export default {
           theme.path = GamePath;
           const saved = await window.api.SaveTheme(theme);
           console.log('Current Settings Saved?: ', saved);
+          if (saved) EventBus.emit('CurretSettingsUpdated');
         }
       }
     },
