@@ -38,7 +38,7 @@ The DXGI factory and D3D11 swapchain entry points in this upstream revision are 
 
 ## Install
 
-1. Download the `dxmt-arm64ec-edhm-crossover-50102f99-nvext.zip` prerelease asset.
+1. Download the `dxmt-arm64ec-edhm-crossover-50102f99-nvext.zip` release asset.
 2. Verify its SHA-256 using the release checksum file.
 3. Unzip it, then run:
 

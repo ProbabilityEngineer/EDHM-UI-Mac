@@ -142,7 +142,7 @@ This project remains licensed under [GPL-3.0+](license.txt).
 
 ## CrossOver Preview ARM64EC DXMT for EDHM (experimental)
 
-This optional [DXMT ARM64EC prerelease](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-50102f99-nvext) is for Apple Silicon users running Elite through a CrossOver Preview ARM/FEX bottle with EDHM/3Dmigoto. It packages unmodified upstream DXMT `50102f99` with NVAPI/NGX enabled. The maintainer reports this build working; it remains experimental, not an official or general compatibility guarantee.
+This optional [DXMT ARM64EC release](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-50102f99-nvext) is for Apple Silicon users running Elite through a CrossOver Preview ARM/FEX bottle with EDHM/3Dmigoto. It packages unmodified upstream DXMT `50102f99` with NVAPI/NGX enabled. The maintainer reports this build working; it remains experimental, not an official or general compatibility guarantee.
 
 It does **not** replace DXMT files in your bottle or your installed CrossOver app. Instead, its installer creates a separate app copy in `~/Applications` with the matched Windows and Unix DXMT modules.
 
