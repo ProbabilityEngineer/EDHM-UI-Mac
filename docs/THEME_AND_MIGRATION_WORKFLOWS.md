@@ -1,8 +1,8 @@
 # Theme saves and recoverable migration
 
 These changes are included in the refreshed arm64 and universal 3.1.4
-downloads built from `f47e401`. The standalone x64 download is the original
-3.1.4 build; Intel users should choose universal for these fixes.
+downloads built from `f47e401`. The standalone x64 download has been removed
+from 3.1.4; Intel users should choose universal.
 
 ## Saving XML changes
 
