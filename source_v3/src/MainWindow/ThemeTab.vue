@@ -419,6 +419,12 @@ export default {
           window.api.LoadUserSettings(),
         ]);
         if (requestId !== this.currentSettingsRequestId || !this.themes.includes(item)) return;
+        if (!current) {
+          item.name = 'Current Settings: Unavailable';
+          item.status = 'Install or repair EDHM for the selected game instance to load Current Settings.';
+          item.alt = item.name;
+          return;
+        }
         const themes = this.themes.filter(entry => entry.id !== 0).map(entry => entry.file.theme);
         Object.assign(item, getCurrentThemeStatus(current, themes, globalSettings, userSettings));
         item.alt = item.name;

@@ -68,6 +68,46 @@ test('XML save targets only active Current Settings; errors never emit success',
   assert.deepEqual(events.map(([name]) => name), ['ShowError']);
 });
 
+test('Missing Current Settings clears stale selection without error notifications or stuck spinners', async () => {
+  const events = [];
+  const component = load('MainWindow/NavBars.vue', id =>
+    id.includes('EventBus') ? { emit: (...args) => events.push(args) } : {}, {
+      document: { querySelectorAll: () => [] },
+      window: { api: {
+        GetCurrentSettingsTheme: async () => null,
+        GetCurrentSettings: async () => null,
+        joinPath: async (...parts) => path.join(...parts),
+      } },
+    }).default;
+  const state = { themeLoadRequestId: 0, themeTemplate: { credits: { theme: 'Stale' } },
+    ActiveInstance: { path: '/game' }, currentSettingsPath: '/old' };
+  const result = await component.methods.LoadTheme.call(state, {
+    file: { credits: { theme: 'Current Settings' }, path: '/game/EDHM-ini' },
+  });
+  assert.equal(result, false);
+  assert.equal(state.themeTemplate, null);
+  assert.equal(state.currentSettingsPath, '');
+  assert.equal(state.isThemeLoading, false);
+  assert.equal(state.showSpinner, false);
+  assert.match(state.statusText, /Install or repair EDHM/);
+  assert.deepEqual(events, [['ThemeLoaded', null]]);
+  assert.equal(await component.methods.LoadCurrentSettings.call(state), null);
+});
+
+test('Missing Current Settings card gives an actionable unavailable state', async () => {
+  const component = load('MainWindow/ThemeTab.vue', () => ({}), {
+    document: { querySelectorAll: () => [] },
+    window: { api: {
+      GetCurrentSettings: async () => null,
+      LoadGlobalSettings: async () => ({}), LoadUserSettings: async () => ({}),
+    } },
+  }).default;
+  const item = { id: 0, file: { path: '/game/EDHM-ini' } };
+  await component.methods.CurretSettingsUpdated.call({ currentSettingsRequestId: 0, themes: [item] });
+  assert.equal(item.name, 'Current Settings: Unavailable');
+  assert.match(item.status, /Install or repair EDHM/);
+});
+
 test('Save Copy cancel does not save; repeated submit is single-flight and failed saves stay open', async () => {
   const events = [];
   let writes = 0, closes = 0, finish;

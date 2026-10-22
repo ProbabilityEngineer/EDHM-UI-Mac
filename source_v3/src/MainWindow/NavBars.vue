@@ -445,6 +445,13 @@ export default {
           }
 
           if (requestId !== this.themeLoadRequestId) return false;
+          if (!loadedTemplate) {
+            this.themeTemplate = null;
+            this.currentSettingsPath = '';
+            this.statusText = 'Current Settings unavailable. Install or repair EDHM for the selected game instance.';
+            EventBus.emit('ThemeLoaded', null);
+            return false;
+          }
           this.themeTemplate = loadedTemplate;
           this.currentSettingsPath = template.credits.theme === 'Current Settings' ? template.path : '';
           console.log('Loaded Theme:', this.themeTemplate);
@@ -590,6 +597,10 @@ export default {
         if (this.ActiveInstance.path != '') {
           const themePath = await window.api.joinPath(this.ActiveInstance.path, 'EDHM-ini');
           let _ret = await window.api.GetCurrentSettings(themePath);
+          if (!_ret) {
+            this.statusText = 'Current Settings unavailable. Install or repair EDHM for the selected game instance.';
+            return null;
+          }
           _ret.version = this.programSettings.Version_ODYSS; //<- Load version from EDHM  
           //console.log('Current Settings:', _ret);
           return _ret;
@@ -766,6 +777,7 @@ export default {
           const result = await window.api.ShowMessageBox(options); //console.log(result);
           if (result && result.response === 1) {
             const curSettings = await this.LoadCurrentSettings();
+            if (!curSettings) return;
             EventBus.emit('DoUpdateTheme', {
               theme: JSON.parse(JSON.stringify(this.themeTemplate)),
               source: curSettings

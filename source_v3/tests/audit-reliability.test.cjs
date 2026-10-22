@@ -31,6 +31,19 @@ function themeFixture(parser) {
 }
 const fourInis = { StartupProfile: {}, Advanced: {}, SuitHud: {}, XmlProfile: {} };
 
+test('Missing, empty and broken-link Current Settings are unavailable, without writing defaults', async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'edhm-missing-current-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const helper = themeFixture({});
+  assert.equal(await helper.GetCurrentSettingsTheme(path.join(dir, 'missing')), null);
+  assert.equal(await helper.GetCurrentSettingsTheme(dir), null);
+  fs.symlinkSync(path.join(dir, 'missing'), path.join(dir, 'EDHM-ini'));
+  assert.equal(await helper.GetCurrentSettingsTheme(path.join(dir, 'EDHM-ini')), null);
+  assert.deepEqual(fs.readdirSync(dir), ['EDHM-ini']);
+  await assert.rejects(helper.LoadThemeINIs(dir), /No theme INI/);
+  await assert.rejects(helper.SaveThemeINIs(dir, {}), /No loaded theme INI/);
+});
+
 test('False INI results are failures, with filenames rather than false success', async () => {
   let writes = 0;
   const helper = themeFixture({ SaveIniFile: async () => { writes++; return false; } });

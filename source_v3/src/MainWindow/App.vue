@@ -306,6 +306,10 @@ export default {
      * @param event Contains the template of the theme     */
     OnTemplateLoaded(event) {
       try {
+        if (!event) {
+          this.themeTemplate = null;
+          return;
+        }
         this.themeTemplate = JSON.parse(JSON.stringify(event));
         console.log('Theme Loaded: ', this.themeTemplate.credits.theme); console.log('Theme:', this.themeTemplate);
        

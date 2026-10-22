@@ -249,6 +249,21 @@ async function UnFavoriteTheme(themePath) {
 /** Returns the Currently Applied Theme Settings as a ThemeTemplate
  * @param {*} themePath Full path to the Game Instance */
 async function GetCurrentSettingsTheme(themePath) {
+  // An uninstalled/removed EDHM setup has no Current Settings. Do not
+  // manufacture defaults or turn this normal state into an IPC exception.
+  if (!themePath) return null;
+  let available = false;
+  for (const filename of ['ThemeSettings.json', ...THEME_INI_FILES.map(([name]) => name)]) {
+    try {
+      if ((await fsp.stat(getIniFilePath(themePath, filename))).isFile()) {
+        available = true;
+        break;
+      }
+    } catch (error) {
+      if (!['ENOENT', 'ENOTDIR'].includes(error.code)) throw error;
+    }
+  }
+  if (!available) return null;
   return LoadTheme(themePath);
   /*
   try {
@@ -1051,7 +1066,8 @@ ipcMain.handle('SaveThemeCopy', async (event, name) => {
   const settings = await settingsHelper.loadSettings();
   const game = instance.key === 'ED_Odissey' ? 'ODYSS' : 'HORIZ';
   const root = path.join(FileHelper.resolveEnvVariables(settings.UserDataFolder), game, 'Themes');
-  const current = await LoadTheme(path.join(instance.path, 'EDHM-ini'));
+  const current = await GetCurrentSettingsTheme(path.join(instance.path, 'EDHM-ini'));
+  if (!current) throw new Error('Current Settings unavailable. Install or repair EDHM before saving a copy.');
   return saveThemeCopy(root, current, name);
 });
 ipcMain.handle('UpdateTheme', async (event, theme, source) => {

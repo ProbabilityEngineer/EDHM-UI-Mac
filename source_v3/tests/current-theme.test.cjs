@@ -110,6 +110,7 @@ test('Real ThemeHelper save/load preserves identity across process-style reloads
   fs.writeFileSync(templatePath,JSON.stringify(savedTheme()));
   const gamePath=path.join(directory,'game','EDHM-ini');
   const fileHelper={
+    resolveEnvVariables:value=>value,
     getAssetPath:()=>templatePath,
     loadJsonFile:async file=>JSON.parse(fs.readFileSync(file,'utf8')),
     ensureDirectoryExists:folder=>{fs.mkdirSync(folder,{recursive:true});return true;},
