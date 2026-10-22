@@ -12,7 +12,7 @@
     <!-- List of Themes -->
     <ul v-else>
       <li v-for="image in images" :key="image.id" :id="'image-' + image.id" class="image-container"
-        :class="{ 'selected': image.id === selectedImageId }" @click="focusThemeList(); OnSelectTheme(image)"
+        :class="{ 'selected': image.id === selectedImageId }" :title="image.status" @click="focusThemeList(); OnSelectTheme(image)"
         @contextmenu="onRightClick($event, image)">
         <img :src="image.src" :alt="image.alt" class="img-thumbnail" aria-label="Image of {{ image.name }}" />
         <span class="image-label">{{ image.name }}</span>
@@ -47,6 +47,7 @@
 
 <script>
 import EventBus from '../EventBus';
+import { getCurrentThemeStatus } from '../Helpers/CurrentThemeStatus.js';
 
 // Enable Dropdown for the Context Menu
 const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
@@ -74,6 +75,7 @@ export default {
       contextMenuStyle: {},
       showContextMenuFlag: false, //<- Flag to show the Context Menu
       favToogle: false,
+      currentSettingsRequestId: 0,
     };
   },
   computed: {
@@ -81,7 +83,7 @@ export default {
       return this.selectedTheme && this.selectedTheme.file && this.selectedTheme.file.isFavorite;
     },
     isCurrentSettings(){
-      return this.selectedTheme && this.selectedTheme.name === "Current Settings";
+      return this.selectedTheme && this.selectedTheme.id === 0;
     }
   },
   methods: {
@@ -181,9 +183,9 @@ export default {
           this.themes[0].name = 'Current Settings: ' + appliedThemeName;
           this.themes[0].src = appliedTheme.src;
           this.themes[0].preview = appliedTheme.preview;
-          this.themes[0].file.credits = { ...this.themes[0].file.credits, ...appliedTheme.file.credits };
         }
 
+        await this.CurretSettingsUpdated();
         this.FilterThemes(this.programSettings.FavToogle);
         EventBus.emit('OnThemesLoaded', this.themes);  //<- this event will be heard in 'App.vue'
 
@@ -406,11 +408,28 @@ export default {
 
     /** When a Theme is Applied and Current Settings got updated
      * @param theme data of the applied theme     */
-    CurretSettingsUpdated(theme) {
-      if (this.themes && this.themes.length > 0) {
+    async CurretSettingsUpdated(theme) {
+      const requestId = ++this.currentSettingsRequestId;
+      const item = this.themes.find(entry => entry.id === 0);
+      if (!item) return;
+      try {
+        const [current, globalSettings, userSettings] = await Promise.all([
+          window.api.GetCurrentSettings(item.file.path),
+          window.api.LoadGlobalSettings(),
+          window.api.LoadUserSettings(),
+        ]);
+        if (requestId !== this.currentSettingsRequestId || !this.themes.includes(item)) return;
+        const themes = this.themes.filter(entry => entry.id !== 0).map(entry => entry.file.theme);
+        Object.assign(item, getCurrentThemeStatus(current, themes, globalSettings, userSettings));
+        item.alt = item.name;
+      } catch (error) {
+        if (requestId !== this.currentSettingsRequestId || !this.themes.includes(item)) return;
+        item.name = 'Current Settings: Unverified';
+        item.status = 'Unable to compare current settings with saved themes.';
+        console.warn('Failed to identify current settings:', error);
+      }
+      if (theme?.credits) {
         // Keep the synthetic Current Settings entry in sync with the newly applied theme.
-        this.themes[0].name = 'Current Settings: ' + theme.credits.theme;
-        this.themes[0].file.credits = theme.credits;
 
         // Move the visible selection marker to the theme that was actually applied.
         // Applying a theme does not re-click the list item, so without this the

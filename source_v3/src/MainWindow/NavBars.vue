@@ -39,7 +39,7 @@
           <div class="input-group mb-3">
 
             <button id="cmdAddNewTheme" class="btn btn-outline-secondary" type="button" data-bs-toggle="tooltip"
-              data-bs-placement="bottom" data-bs-title="Add New Theme" @mousedown="addNewTheme_Click">
+              data-bs-placement="bottom" data-bs-title="Add New Theme" @click="addNewTheme_Click" :disabled="newThemeConfirmationPending">
               <i class="bi bi-plus-circle"></i>
             </button>
             <button id="cmdEditTheme" class="btn btn-outline-secondary" type="button" data-bs-toggle="tooltip"
@@ -167,10 +167,15 @@
           </div>
         </div>
 
+        <span id="lblEDHMStatus" class="navbar-text mx-2 text-nowrap"
+          :class="edhmStatusDisplay.className" :title="edhmStatusDisplay.detail" role="status">
+          {{ edhmStatusDisplay.label }}
+        </span>
         <!-- App Version Label -->
         <span class="navbar-text mx-3" id="lblVersion">App Version: {{ appVersion }}</span>
         <!-- Mod Version Label -->
-        <span class="navbar-text mx-3" id="lblModVersion">EDHM Version: {{ modVersion }}</span>
+        <span class="navbar-text mx-3" id="lblModVersion"
+          title="EDHM version bundled with this app for the selected game. Install EDHM to update the game files.">EDHM Version: {{ modVersion }}</span>
 
         <!-- Progress bar-->
         <span v-show="showProgressBar" class="progress" role="progressbar" aria-label="Warning example"
@@ -201,6 +206,7 @@
 <script>
 import { ref } from 'vue';
 import EventBus from '../EventBus';
+import { getEdhmStatusDisplay } from '../Helpers/EdhmStatusDisplay.js';
 import ThemeTab from './ThemeTab.vue';
 import Util from '../Helpers/Utils.js';
 import HUD_Areas from './HudImage.vue';
@@ -260,6 +266,7 @@ export default {
       edhmInstalled: null,
       edhmStatus: null,
       initialEdhmStatusChecked: false,
+      newThemeConfirmationPending: false,
 
       showProgressBar: false,
       progressValue: 0,
@@ -285,6 +292,9 @@ export default {
     GlobalSettingsTab
   },
   computed: {
+    edhmStatusDisplay() {
+      return getEdhmStatusDisplay(this.edhmStatus);
+    },
     edhmToggleMenuLabel() {
       if (this.edhmStatus?.state === 'ready') return 'Disable EDHM';
       if (this.edhmStatus?.state === 'disabled') return 'Enable EDHM';
@@ -294,7 +304,7 @@ export default {
       return 'Enable/Disable EDHM';
     },
     showInstallMenuOption() {
-      return this.edhmStatus === null || this.edhmStatus?.state === 'not_installed';
+      return this.edhmStatus === null || this.edhmStatus?.conflict || this.edhmStatus?.state === 'not_installed';
     },
     showUninstallMenuOption() {
       return this.edhmStatus === null || ['ready', 'disabled'].includes(this.edhmStatus?.state);
@@ -335,6 +345,8 @@ export default {
       }
     },
     async refreshEdhmInstallState() {
+      const gameType = this.ActiveInstance?.key === 'ED_Horizons' ? 'HORIZ' : 'ODYSS';
+      this.modVersion = this.programSettings[`Version_${gameType}`] || '';
       try {
         if (!this.ActiveInstance?.path) {
           this.edhmInstalled = false;
@@ -430,7 +442,7 @@ export default {
           this.currentSettingsPath = template.credits.theme === 'Current Settings' ? template.path : '';
           console.log('Loaded Theme:', this.themeTemplate);
           EventBus.emit('ThemeLoaded', JSON.parse(JSON.stringify(this.themeTemplate)));
-          this.statusText = 'Theme: ' + theme.name;
+          this.statusText = 'Selected Theme: ' + theme.name;
           return true;
         }
         return false;
@@ -647,6 +659,9 @@ export default {
       }
     },
     async addNewTheme_Click(event) {
+      if (this.newThemeConfirmationPending) return;
+      this.newThemeConfirmationPending = true;
+      try {
       const options = {
         type: 'question', //<- none, info, error, question, warning
         buttons: ['Cancel', 'Yes, I am sure', 'No, take me back'],
@@ -659,6 +674,9 @@ export default {
       const result = await window.api.ShowMessageBox(options); //console.log(result);
       if (result && result.response === 1) {
         EventBus.emit('OnCreateTheme', { theme: null }); //<- Event Listened on App.vue
+      }
+      } finally {
+        this.newThemeConfirmationPending = false;
       }
     },
     async editTheme_Click(event) {
@@ -977,6 +995,7 @@ export default {
           theme.path = GamePath;
           const saved = await window.api.SaveTheme(theme);
           console.log('Current Settings Saved?: ', saved);
+          if (saved) EventBus.emit('CurretSettingsUpdated');
         }
       }
     },

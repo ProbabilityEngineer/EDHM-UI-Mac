@@ -10,6 +10,7 @@ import settingsHelper from './SettingsHelper.js'
 import { writeFile } from 'node:fs/promises';
 import FileHelper from './FileHelper';
 import SettingsHelper from './SettingsHelper.js';
+import { themeReloadSignal } from './ThemeReloadSignal.js';
 
 let LoadedThemes = null; //<- Cache for the loaded themes
 // #region --------- Theme Helper Functions: ---------------------  
@@ -298,7 +299,7 @@ async function CreateNewTheme(credits) {
       CurrentSettings.credits.theme = Credits.theme;
       CurrentSettings.credits.author = Credits.author;
       CurrentSettings.credits.description = Credits.description;
-      CurrentSettings.version = settings.Version_ODYSS;
+      CurrentSettings.version = settings[`Version_${GameType}`];
       CurrentSettings.game = gameInstance.key;
       CurrentSettings.path = '';
 
@@ -352,7 +353,7 @@ async function UpdateTheme(themeData, source) {
       CurrentSettings.credits.theme = Credits.theme;
       CurrentSettings.credits.author = Credits.author;
       CurrentSettings.credits.description = Credits.description;
-      CurrentSettings.version = settings.Version_ODYSS;
+      CurrentSettings.version = settings[`Version_${GameType}`];
       CurrentSettings.game = gameInstance.key;
       CurrentSettings.path = '';
 
@@ -371,6 +372,16 @@ async function UpdateTheme(themeData, source) {
   }
 }
 
+function isActiveThemePath(themePath) {
+  const active = settingsHelper.getActiveInstance();
+  const gamePath = Array.isArray(active?.path) ? active.path[0] : active?.path;
+  return typeof gamePath === 'string' && gamePath !== '' &&
+    path.relative(
+      FileHelper.resolveEnvVariables(path.join(gamePath, 'EDHM-ini')),
+      FileHelper.resolveEnvVariables(themePath)
+    ) === '';
+}
+
 /** Saves Theme Changes directly into the 'ThemeSettings.json'
  * @param {*} themeData Data of the Theme */
 async function SaveTheme(themeData) {
@@ -383,8 +394,16 @@ async function SaveTheme(themeData) {
     if (FileHelper.ensureDirectoryExists(themesPath)) {
 
       //4. WRITE THE NEW THEME FILES:
-      FileHelper.writeJsonFile(path.join(themesPath, 'ThemeSettings.json'), themeData);
-      if (FileHelper.checkFileExists(path.join(themesPath, 'ThemeSettings.json'))) {
+      const signalPath = path.join(themesPath, 'ThemeSettings.json');
+      FileHelper.writeJsonFile(signalPath, themeData);
+      if (FileHelper.checkFileExists(signalPath)) {
+        try {
+          if (isActiveThemePath(themesPath)) {
+            themeReloadSignal.schedule(FileHelper.resolveEnvVariables(signalPath), () => isActiveThemePath(themesPath));
+          }
+        } catch (error) {
+          console.warn('Theme saved but reload retry could not be scheduled:', error);
+        }
         return true;
       } else {
         return false;
@@ -774,6 +793,7 @@ const LoadThemeINIs = async (folderPath) => {
  * @param {object} themeINIs Object containing the INI data
  * @returns boolean 'true' is save is successful. */
 const SaveThemeINIs = async (folderPath, themeINIs) => {
+  themeReloadSignal.cancel();
   try {
     await Promise.all([
       await INIparser.SaveIniFile(getIniFilePath(folderPath, 'Startup-Profile.ini'), themeINIs.StartupProfile),

@@ -349,5 +349,26 @@
     "ed_short": "mediumtransport01",
     "size": "Medium",
     "role": "Passenger "
+  },
+  {
+    "ship_full_name": "Nomad",
+    "ship_id": 57,
+    "ed_short": "lander01",
+    "size": "Small",
+    "role": "Explorer "
+  },
+  {
+    "ship_full_name": "SRV Rhino",
+    "ship_id": 58,
+    "ed_short": "mev_rhino",
+    "size": "Small",
+    "role": "Miner "
+  },
+  {
+    "ship_full_name": "Anaconda Mk II",
+    "ship_id": 59,
+    "ed_short": "anacondamkii",
+    "size": "Large",
+    "role": "Multipurpose "
   }
 ]

@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="bg-dark text-light" data-bs-theme="dark">
    
-    <NavBarsBody :themesLoaded="themesLoaded" />
+    <NavBarsBody ref="navBars" :themesLoaded="themesLoaded" />
     <Notifications/>
 
     <SettingsEditor @save="saveConfig" />
@@ -470,11 +470,14 @@ export default {
     },
     /** When the User Clicks on a Search Result. 
      * @param result The Result clicked     */
-    OnSearchBox_Click(result) {
+    async OnSearchBox_Click(result) {
       //console.log('Result clicked:', result);
       try {
         if (result.Parent === 'Themes') {
           EventBus.emit('setActiveTab', 'themes'); //<- Event listen in 'MainNavBars.vue'
+          if (this.$refs.navBars.showFavorites) {
+            await this.$refs.navBars.toggleFavorites_click();
+          }
           EventBus.emit('OnSelectTheme', result.Tag); //<- Event listened on 'ThemeTab.vue'
         } else {
           if (result.Parent === 'Global Settings') {
@@ -685,6 +688,7 @@ export default {
         EventBus.emit('OnXmlChanged', { xml: JSON.parse(JSON.stringify(this.themeTemplate.xml_profile)) }); //<- Event Listen in 'NavBars.vue'
 
         if (_ret) {
+          EventBus.emit('CurretSettingsUpdated');
           EventBus.emit('RoastMe', { type: 'Success', message: `Theme: '${this.themeTemplate.credits.theme}' Saved.<br>Remember to Apply the changes.` });
         }
       } catch (error) {
