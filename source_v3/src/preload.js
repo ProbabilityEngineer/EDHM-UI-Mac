@@ -100,6 +100,7 @@ contextBridge.exposeInMainWorld('api', {
 
 
   CreateNewTheme: async (themeData) => ipcRenderer.invoke('CreateNewTheme', themeData),
+  SaveThemeCopy: async (name) => ipcRenderer.invoke('SaveThemeCopy', name),
   ExportTheme: async (themeData) => ipcRenderer.invoke('ExportTheme', themeData),
   ImportTheme: async (zip_path) => ipcRenderer.invoke('ImportTheme', zip_path),
   UpdateTheme: async (themeData, source) => ipcRenderer.invoke('UpdateTheme', themeData, source),
@@ -248,5 +249,4 @@ contextBridge.exposeInMainWorld('shipyardAPI', {
   onMonitoringStopped: (callback) => ipcRenderer.on('shipyard:monitoringStopped', () => callback()),
   onError: (callback) => ipcRenderer.on('shipyard:error', (e, err) => callback(err)),
 });
-
 

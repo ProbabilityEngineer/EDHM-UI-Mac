@@ -11,6 +11,7 @@ import { writeFile } from 'node:fs/promises';
 import FileHelper from './FileHelper';
 import SettingsHelper from './SettingsHelper.js';
 import { themeReloadSignal } from './ThemeReloadSignal.js';
+import { saveThemeCopy, validateThemeName } from './ThemeCopy.js';
 
 let LoadedThemes = null; //<- Cache for the loaded themes
 // #region --------- Theme Helper Functions: ---------------------  
@@ -283,7 +284,7 @@ async function CreateNewTheme(credits) {
     //console.log('credits: ', credits);  //<- credits: { theme: 'ThemeName', author: '', description: '', preview: 'Base64image', thumb: 'Base64image' }
 
     //1. RESOLVE THE THEMES PATH:
-    const Credits = credits.credits;
+    const Credits = { ...credits.credits, theme: validateThemeName(credits.credits.theme) };
     const gameInstance = await settingsHelper.getActiveInstance();              //console.log('gameInstance: ', gameInstance);  
     const GameType = gameInstance.key === 'ED_Odissey' ? 'ODYSS' : 'HORIZ';     //console.log('GameType: ', GameType);  
     const settings = await settingsHelper.loadSettings();                       //console.log('settings: ', settings);    
@@ -296,6 +297,7 @@ async function CreateNewTheme(credits) {
       //3. LOAD THE CURRENTLY APPLIED THEME SETTINGS:
       //const CurrentSettings = await GetCurrentSettingsTheme(path.join(gameInstance.path, 'EDHM-ini'));
       const CurrentSettings = await LoadTheme(path.join(gameInstance.path, 'EDHM-ini'));
+      CurrentSettings.name = Credits.theme;
       CurrentSettings.credits.theme = Credits.theme;
       CurrentSettings.credits.author = Credits.author;
       CurrentSettings.credits.description = Credits.description;
@@ -350,6 +352,7 @@ async function UpdateTheme(themeData, source) {
 
       //3. LOAD THE CURRENTLY APPLIED THEME SETTINGS:
       const CurrentSettings = source;
+      CurrentSettings.name = Credits.theme;
       CurrentSettings.credits.theme = Credits.theme;
       CurrentSettings.credits.author = Credits.author;
       CurrentSettings.credits.description = Credits.description;
@@ -1040,6 +1043,16 @@ ipcMain.handle('CreateNewTheme', async (event, credits) => {
   } catch (error) {
     throw new Error(error.message + error.stack);
   }
+});
+
+ipcMain.handle('SaveThemeCopy', async (event, name) => {
+  const instance = await settingsHelper.getActiveInstance();
+  if (!instance?.path) throw new Error('Configure a game instance before saving a copy.');
+  const settings = await settingsHelper.loadSettings();
+  const game = instance.key === 'ED_Odissey' ? 'ODYSS' : 'HORIZ';
+  const root = path.join(FileHelper.resolveEnvVariables(settings.UserDataFolder), game, 'Themes');
+  const current = await LoadTheme(path.join(instance.path, 'EDHM-ini'));
+  return saveThemeCopy(root, current, name);
 });
 ipcMain.handle('UpdateTheme', async (event, theme, source) => {
   try {

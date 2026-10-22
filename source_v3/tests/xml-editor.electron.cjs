@@ -29,6 +29,29 @@ app.whenReady().then(async () => {
       function evaluate(code) {const m={exports:{}}; new Function('require','module','exports',code)(imports,m,m.exports); return m.exports;}
       const component = evaluate(${JSON.stringify(script)}).default;
       component.render = evaluate(${JSON.stringify(template)}).render;
+      // Exercise the actual two-texture WebGL shader before stubbing modal
+      // preview refreshes. A zero mask must leave the background untouched.
+      const texture = (left, right) => {
+        const c = document.createElement('canvas'); c.width=2; c.height=1;
+        const ctx=c.getContext('2d');
+        ctx.fillStyle=left; ctx.fillRect(0,0,1,1);
+        ctx.fillStyle=right; ctx.fillRect(1,0,1,1);
+        return c.toDataURL();
+      };
+      const output = document.createElement('canvas');
+      const shaderState = {...component.methods, previewRequestId:1};
+      const rendered = await shaderState.applyColorMatrixWebGL({
+        imageSrc:texture('rgb(128,64,0)','rgb(128,64,0)'),
+        maskSrc:texture('black','white'), canvas:output, requestId:1,
+        colorMatrix:shaderState.buildWebGLColorMatrixFrom3x3([[1,0,0],[0,1,0],[0,0,1]])
+      });
+      const img = new Image(); img.src=rendered; await img.decode();
+      const readback=document.createElement('canvas');readback.width=2;readback.height=1;
+      const ctx=readback.getContext('2d');ctx.drawImage(img,0,0);
+      const pixels=ctx.getImageData(0,0,2,1).data;
+      assert.ok(Math.abs(pixels[0]-128)<=1 && Math.abs(pixels[1]-64)<=1,'Background changed outside HUD mask');
+      assert.ok(pixels[4]>240 && pixels[5]>110,'HUD mask did not apply straight-color transformation');
+      assert.equal(output.getContext('webgl').getError(),0,'WebGL draw failed');
       component.methods.OnInitialize = () => {};
       component.methods.applyFilter = function() { this.TransformXMLColors(); };
       let saves = 0;

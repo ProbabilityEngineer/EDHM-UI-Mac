@@ -13,6 +13,7 @@ import Util from './Utils.js';
 import { getModBundle } from './ModBundle.js';
 import { themeReloadSignal } from './ThemeReloadSignal.js';
 import { retireObsoleteOdysseyShaders } from './ObsoleteShaders.js';
+import { runLegacyHotfix } from './LegacyHotfix.js';
 
 /*----------------------------------------------------------------------------------------------------------------------------*/
 let programSettings = null; // Holds the Program Settings in memory
@@ -825,6 +826,8 @@ async function installEDHMmod(gameInstance) {
       );
       if (_ret && installedPair.every(Boolean)) {
         if (GameType === 'ODYSS') retireObsoleteOdysseyShaders(shaderSymLinkTarget);
+        const hotfix = fileHelper.loadJsonFile(fileHelper.getAssetPath('data/EDHM_HOTFIX.json'));
+        runLegacyHotfix(hotfix?.active_jobs || [], [{ ...gameInstance, path: gamePath }]);
         for (const { disabled } of EDHM_DLL_FILES) {
           const disabledPath = path.join(gamePath, disabled);
           if (await fileExists(disabledPath)) await unlink(disabledPath);
@@ -1031,109 +1034,10 @@ async function ToggleEDHMmod(gameInstance) {
 
 /** This are actions to be run after an App Update is applied and Before EDHM mod is installed. */
 async function DoHotFix() {
-  try {
-    const hotfixJsonPath = fileHelper.getAssetPath('data/EDHM_HOTFIX.json');
-    if (hotfixJsonPath) {
-      const hotFix = fileHelper.loadJsonFile(hotfixJsonPath);
-      if (hotFix) {
-        console.log('------ Applying HotFixes --------');
-        const AppExePath = fileHelper.getAppDataRoot();
-        const UI_DOCUMENTS = programSettings.UserDataFolder; // fileHelper.resolveEnvVariables('%USERPROFILE%\\EDHM_UI');
-        const GameInstances = readSetting('GameInstances');
-
-        if (GameInstances?.length > 0) {
-          for (const instance of GameInstances) {
-            for (const game of instance.games) {
-              if (game.path && game.path !== '') {
-
-                console.log('------ Applying HotFixes on ', game.instance);
-                const GamePath = game.path;
-
-                for (const _job of hotFix.active_jobs) {
-
-                  //- 1. Start by Resolving path Variables:
-                  _job.file_path = _job.file_path.replace("%GAME_PATH%", GamePath);
-                  _job.file_path = _job.file_path.replace("%UI_PATH%", AppExePath);
-                  _job.file_path = _job.file_path.replace("%UI_DOCS%", UI_DOCUMENTS);
-                  if (!Util.isEmpty(_job.destination)) {
-                    _job.destination = _job.destination.replace("%GAME_PATH%", GamePath);
-                    _job.destination = _job.destination.replace("%UI_PATH%", AppExePath);
-                  }
-
-                  //- 2. Resolve the Job Actions:
-                  try {
-                    const folder_path = path.dirname(_job.file_path); //Obtiene el Path: (Sin archivo ni extension:
-                    const file_name = path.basename(_job.file_path); //<- Nombre del Archivo con Extension (Sin Ruta)
-
-                    switch (_job.action) {
-                      
-                      case "COPY": //Copia un Archivo o Directorio de un lugar a otro, acepta comodines
-                        console.log('- COPY: ' + file_name + ' -> ' + path.dirname(_job.destination));
-                        await fileHelper.copyFile(_job.file_path, _job.destination, false);
-                        break;
-
-                      case "DEL": //Borra un Archivo
-                        console.log('- DEL: ' + _job.file_path);
-                        //Borra archivos usando comodines
-                        if (file_name.includes("*")) {
-                          await fileHelper.deleteFilesByWildcard(_job.file_path);
-                        }
-                        else {
-                          //Borra el archivo indicado, si existe
-                          fileHelper.deleteFileByAbsolutePath(_job.file_path);
-                        }
-                        break;
-
-                      case "REPLACE": //Copia el Archivo sólo si existe previamente
-                        console.log('- REPLACE: ' + file_name + ' -> ' + path.dirname(_job.destination));
-                        if (fs.existsSync(_job.file_path) && fs.existsSync(_job.destination)) {
-                          await fileHelper.copyFile(_job.file_path, _job.destination, false);
-                        }
-                        break;
-
-                      case "MOVE": //Mueve un Archivo de un lugar a otro, acepta comodines
-                        console.log('- MOVE: ' + file_name + ' -> ' + path.dirname(_job.destination));
-                        if (fs.existsSync(_job.file_path)) {
-                          if (!fs.existsSync(path.dirname(_job.destination))) {
-                            Directory.CreateDirectory(path.dirname(_job.destination));
-                          }
-                          await fileHelper.copyFile(_job.file_path, _job.destination, true);
-                        }
-                        break;
-
-                      case "RMDIR": //Borra un Directorio y todo su contenido
-                        console.log('- RMDIR: ', _job.file_path);
-                        await fileHelper.deleteFolderRecursive(_job.file_path);
-                        break;
-
-                      case "RMDIR-EX": //Borra las Carpetas de un Directorio salvo las Execpciones
-                        //El nombre del directorio Raiz va en 'file_path', ej: "file_path":"%UI_DOCS%\\ODYSS",
-                        //Las Excepciones van en 'destination', solo los nombres separados x comas. ej:  "destination":"Themes,History"
-                        console.log('- RMDIR-EX: ', folder_path, _job.destination);
-                        await fileHelper.deleteDirectoriesExcept(_job.file_path, _job.destination);
-                        break;
-
-                      case "MVDIR": //Mueve un Directorio de un lugar a otro
-                        console.log('- MVDIR: ', folder_path, _job.destination);
-                        await fileHelper.moveDirectory(_job.file_path, _job.destination);
-                        break;
-
-                      default:
-                        break;
-                    }
-                  } catch (error) {
-                    console.log('Error Applying HotFix -> ', error.message);
-                  }
-                };
-              }
-            }
-          }
-        }
-      }
-    }
-  } catch (error) {
-    throw new Error(error.message + error.stack);
-  }
+  const hotfixPath = fileHelper.getAssetPath('data/EDHM_HOTFIX.json');
+  const hotfix = fileHelper.loadJsonFile(hotfixPath);
+  const instances = (readSetting('GameInstances') || []).flatMap(publisher => publisher.games || []);
+  return runLegacyHotfix(hotfix?.active_jobs || [], instances);
 };
 
 /** * Applies a Theme to the Current Game Instance. * 

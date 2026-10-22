@@ -1,4 +1,4 @@
-import { app, ipcMain, dialog, shell, clipboard, net, } from 'electron';
+import { app, ipcMain, BrowserWindow, dialog, shell, clipboard, net, } from 'electron';
 import { exec, execSync, execFile, spawn } from 'child_process';
 import { promisify } from 'util';
 import path from 'node:path';
@@ -1733,7 +1733,10 @@ ipcMain.handle('ShowMessageBox', async (event, options) => {
       if (result && result.response === 1) { }
   */
   try {
-    const result = await dialog.showMessageBox(options);
+    const parent = BrowserWindow.fromWebContents(event.sender);
+    const result = parent && !parent.isDestroyed()
+      ? await dialog.showMessageBox(parent, options)
+      : await dialog.showMessageBox(options);
     return result;
   } catch (error) {
     throw new Error(error.message + error.stack);

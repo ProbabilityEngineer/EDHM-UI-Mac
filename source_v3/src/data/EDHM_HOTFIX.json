@@ -1,28 +1,52 @@
 {
-   "description": "This are actions to be run after an App Update is applied and Before EDHM mod is installed.",
+   "description": "Recoverable per-instance migrations. Backups live outside EDHM-ini in EDHM-UI-Backups/legacy-hotfix. DLLs and user themes are deliberately preserved.",
    "active_jobs": [
       {
          "game": "ODYSSEY",
-         "file_path": "%GAME_PATH%\\nvapi64.dll",
-         "action": "DEL",
+         "file_path": "%GAME_PATH%\\ShaderFixes\\06a6f557d514e410-ps.txt",
+         "action": "BACKUP",
          "destination": ""
       },
       {
          "game": "ODYSSEY",
-         "file_path": "%GAME_PATH%\\d3dcompiler_46.dll",
-         "action": "DEL",
+         "file_path": "%GAME_PATH%\\ShaderFixes\\188a07a17082f4d5-ps.txt",
+         "action": "BACKUP",
          "destination": ""
       },
       {
          "game": "ODYSSEY",
-         "file_path": "%GAME_PATH%\\EDHM-ini\\3rdPartyMods\\CockpitPaintMod\\*.*",
-         "action": "DEL",
+         "file_path": "%GAME_PATH%\\ShaderFixes\\41fed2d4f01f9e8e-ps.txt",
+         "action": "BACKUP",
          "destination": ""
       },
       {
          "game": "ODYSSEY",
-         "file_path": "%UI_DOCS%\\ODYSS\\Themes\\Refined White Theme",
-         "action": "RMDIR",
+         "file_path": "%GAME_PATH%\\ShaderFixes\\867cd9cc555b6607-ps.txt",
+         "action": "BACKUP",
+         "destination": ""
+      },
+      {
+         "game": "ODYSSEY",
+         "file_path": "%GAME_PATH%\\ShaderFixes\\c2295cdc080b6876-ps.txt",
+         "action": "BACKUP",
+         "destination": ""
+      },
+      {
+         "game": "ODYSSEY",
+         "file_path": "%GAME_PATH%\\ShaderFixes\\f03f683132116c7c-ps.txt",
+         "action": "BACKUP",
+         "destination": ""
+      },
+      {
+         "game": "ODYSSEY",
+         "file_path": "%GAME_PATH%\\EDHM-ini\\3rdPartyMods\\CockpitPaintMod",
+         "action": "BACKUP",
+         "destination": ""
+      },
+      {
+         "game": "ODYSSEY",
+         "file_path": "%GAME_PATH%\\EDHM-ini\\3rdPartyMods\\BiomeOverlayMod",
+         "action": "BACKUP",
          "destination": ""
       }
    ],

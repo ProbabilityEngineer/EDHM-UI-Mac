@@ -677,20 +677,21 @@ export default {
         this.setValue(this.themeTemplate.xml_profile, 'y152', e[2][1]);
         this.setValue(this.themeTemplate.xml_profile, 'z152', e[2][2]);
 
-        console.log('Saving Theme:', this.themeTemplate);
-        if (this.themeTemplate.name === "Current Settings") {
-          const ActiveInstance = await window.api.getActiveInstance();
-          this.themeTemplate.path = await window.api.joinPath(ActiveInstance.path, 'EDHM-ini');
-        }
-
-        const _ret = await window.api.SaveTheme(JSON.parse(JSON.stringify(this.themeTemplate)));
+        // XML edits stage Current Settings only. A selected library theme must
+        // never be overwritten without the separate Overwrite Theme action.
+        const ActiveInstance = await window.api.getActiveInstance();
+        if (!ActiveInstance?.path) throw new Error('Configure a game instance before saving XML settings.');
+        const currentSettings = JSON.parse(JSON.stringify(this.themeTemplate));
+        currentSettings.path = await window.api.joinPath(ActiveInstance.path, 'EDHM-ini');
+        const _ret = await window.api.SaveTheme(currentSettings);
+        if (!_ret) throw new Error('Could not save XML changes to Current Settings.');
         console.log('Theme Saved:', _ret);
         // Emit the XML Changed Event
         EventBus.emit('OnXmlChanged', { xml: JSON.parse(JSON.stringify(this.themeTemplate.xml_profile)) }); //<- Event Listen in 'NavBars.vue'
 
         if (_ret) {
           EventBus.emit('CurretSettingsUpdated');
-          EventBus.emit('RoastMe', { type: 'Success', message: `Theme: '${this.themeTemplate.credits.theme}' Saved.<br>Remember to Apply the changes.` });
+          EventBus.emit('RoastMe', { type: 'Success', message: 'XML changes saved to Current Settings. Apply Theme to update the game; use Overwrite Theme or Save Copy to keep a library version.' });
         }
       } catch (error) {
         console.error('Error onXmlEditorClosed:', error);
@@ -730,10 +731,14 @@ export default {
         console.log('Latest EDHM:', latestEdhm.version, 'Local EDHM:', localEdhmVersion);
         if (isUpdate) {
           EventBus.emit('RoastMe', {
-            type: 'Info',
+            type: 'UpdateInfo',
             title: 'EDHM Update Available',
-            message: `EDHM ${latestEdhm.version} is available (installed: ${localEdhmVersion || 'unknown'}).`,
+            message: `EDHM ${latestEdhm.version} is available (bundled: ${localEdhmVersion || 'unknown'}).`,
             detail: 'Install the latest EDHM payload through an updated EDHM-UI package.',
+            actions: [{
+              label: 'Open Mac releases',
+              onClick: () => window.api.openUrlInBrowser('https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases'),
+            }],
             autoHide: false,
             width: '440px'
           });

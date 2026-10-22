@@ -55,8 +55,12 @@
               <i class="bi bi-arrow-bar-down"></i>
             </button>
             <button id="cmdSaveTheme" class="btn btn-outline-secondary" type="button" data-bs-toggle="tooltip"
-              data-bs-placement="bottom" data-bs-title="Save Theme Changes" @mousedown="saveTheme_Click">
+              data-bs-placement="bottom" data-bs-title="Overwrite Theme" @click="saveTheme_Click">
               <i class="bi bi-floppy"></i>
+            </button>
+            <button id="cmdSaveThemeCopy" class="btn btn-outline-secondary" type="button"
+              title="Save Current Settings as a Copy" @click="$refs.saveThemeCopy.show()">
+              <i class="bi bi-files"></i>
             </button>
             <button id="cmdReloadThemes" class="btn btn-outline-secondary" type="button" data-bs-toggle="tooltip"
               data-bs-placement="bottom" data-bs-title="Reload Themes" @mousedown="reloadThemes_Click">
@@ -202,9 +206,11 @@
   </div> <!-- Container -->
 
 
+  <SaveThemeCopy ref="saveThemeCopy" />
 </template>
 <script>
 import { ref } from 'vue';
+import SaveThemeCopy from './Components/SaveThemeCopy.vue';
 import EventBus from '../EventBus';
 import { getEdhmStatusDisplay } from '../Helpers/EdhmStatusDisplay.js';
 import ThemeTab from './ThemeTab.vue';
@@ -285,6 +291,7 @@ export default {
 
   },
   components: {
+    SaveThemeCopy,
     ThemeTab,
     HUD_Areas,
     PropertiesTabEx,
@@ -750,10 +757,10 @@ export default {
           const options = {
             type: 'question', //<- none, info, error, question, warning
             buttons: ['Cancel', 'Yes, I am sure', 'No, take me back'],
-            defaultId: 1,
-            title: 'Question',
-            message: 'Do you want to proceed?',
-            detail: 'This will take your currently applied settings and Save them into the Selected Theme: ' + tName,
+            defaultId: 0,
+            title: 'Overwrite Theme',
+            message: 'Overwrite this library theme?',
+            detail: 'This will replace the selected library theme with Current Settings: ' + tName,
             cancelId: 0
           };
           const result = await window.api.ShowMessageBox(options); //console.log(result);
