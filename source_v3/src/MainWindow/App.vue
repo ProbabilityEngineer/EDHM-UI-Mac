@@ -229,10 +229,13 @@ export default {
         const NewInstance = await window.api.getInstanceByName(e.GameInstanceName);
         console.log('NewInstance:', NewInstance);
 
+        if (!NewInstance) throw new Error(`Unknown game instance: ${e.GameInstanceName}`);
+        // NavBars has its own settings copy. Persist the chosen instance before
+        // install/restore or initialization handlers read it from the main process.
+        const updatedSettings = { ...this.settings, ActiveInstance: e.GameInstanceName.toString() };
+        this.settings = await window.api.saveSettings(JSON.stringify(updatedSettings, null, 4));
+
         if (!NewInstance?.path) {
-          this.settings.ActiveInstance = e.GameInstanceName;
-          const jsonString = JSON.stringify(this.settings, null, 4);
-          await window.api.saveSettings(jsonString);
           EventBus.emit('InitializeNavBars', JSON.parse(JSON.stringify(this.settings)));
           EventBus.emit('RoastMe', {
             type: 'Warning',
@@ -263,6 +266,7 @@ export default {
           EventBus.emit('RoastMe', { type: 'Success', message: `EDHM ${edhmInstalled.version} Installed.` });
         }        
 
+        this.settings = await window.api.saveSettings(JSON.stringify(this.settings, null, 4));
         EventBus.emit('InitializeNavBars', JSON.parse(JSON.stringify(this.settings))); //<- Event Listened at NavBars.vue
         EventBus.emit('OnInitializeThemes', JSON.parse(JSON.stringify(this.settings)));//<- Event Listened at ThemeTab.vue
         // ThemeTab will emit ShowThemePreview after selecting the applied/remembered theme.
@@ -271,9 +275,6 @@ export default {
 
         EventBus.emit('modUpdated', this.settings);     //<- Event listen in MainNavBars.vue
         EventBus.emit('loadThemes', this.settings.FavToogle);  //<- this event will be heard in 'ThemeTab.vue'
-
-        const jsonString = JSON.stringify(this.settings, null, 4);
-        await window.api.saveSettings(jsonString);
 
         this.StartShipyard();
 

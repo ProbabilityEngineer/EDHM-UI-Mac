@@ -767,26 +767,29 @@ const getIniFilePath = (basePath, fileName) => {
  * @returns Object */
 const LoadThemeINIs = async (folderPath) => {
   try {
-
-    const [Startup_Profile, Advanced, SuitHud, XML_Profile] = await Promise.all([
-      await INIparser.LoadIniFile(getIniFilePath(folderPath, 'Startup-Profile.ini')),
-      await INIparser.LoadIniFile(getIniFilePath(folderPath, 'Advanced.ini')),
-      await INIparser.LoadIniFile(getIniFilePath(folderPath, 'SuitHud.ini')),
-      await INIparser.LoadIniFile(getIniFilePath(folderPath, 'XML-Profile.ini')),
-    ]);
-
-    return {
-      path: folderPath,
-      StartupProfile: Startup_Profile,
-      Advanced: Advanced,
-      SuitHud: SuitHud,
-      XmlProfile: XML_Profile
+    const available = THEME_INI_FILES.filter(([name]) =>
+      fs.existsSync(getIniFilePath(folderPath, name)));
+    if (!available.length) throw new Error(`No theme INI files found in: ${folderPath}`);
+    const loaded = { path: folderPath };
+    for (const [, key] of THEME_INI_FILES) loaded[key] = null;
+    for (const [name, key] of available) {
+      loaded[key] = await INIparser.LoadIniFile(getIniFilePath(folderPath, name));
+      if (!loaded[key]) throw new Error(`Failed to load theme INI: ${name}`);
     }
+    return loaded;
 
   } catch (error) {
     throw new Error(error.message + error.stack);
   }
 };
+
+const THEME_INI_FILES = [
+  ['Startup-Profile.ini', 'StartupProfile'],
+  ['Advanced.ini', 'Advanced'],
+  ['SuitHud.ini', 'SuitHud'],
+  ['XML-Profile.ini', 'XmlProfile'],
+  ['Custom.ini', 'Custom'],
+];
 
 /** * Save the modified INI files back to their original location
  * @param {string} folderPath Full path to the Folder containing the INI files
@@ -795,12 +798,17 @@ const LoadThemeINIs = async (folderPath) => {
 const SaveThemeINIs = async (folderPath, themeINIs) => {
   themeReloadSignal.cancel();
   try {
-    await Promise.all([
-      await INIparser.SaveIniFile(getIniFilePath(folderPath, 'Startup-Profile.ini'), themeINIs.StartupProfile),
-      await INIparser.SaveIniFile(getIniFilePath(folderPath, 'Advanced.ini'), themeINIs.Advanced),
-      await INIparser.SaveIniFile(getIniFilePath(folderPath, 'SuitHud.ini'), themeINIs.SuitHud),
-      await INIparser.SaveIniFile(getIniFilePath(folderPath, 'XML-Profile.ini'), themeINIs.XmlProfile),
-    ]);
+    const files = THEME_INI_FILES.filter(([, key]) => themeINIs?.[key] != null);
+    if (!files.length) throw new Error('No loaded theme INI files were provided to save.');
+    // Wait for every writer, even if one throws. Never signal a reload while
+    // another writer is still running, or report a false-return failure as success.
+    const results = await Promise.allSettled(files.map(([name, key]) =>
+      INIparser.SaveIniFile(getIniFilePath(folderPath, name), themeINIs[key])));
+    const failed = files.filter((_, i) =>
+      results[i].status !== 'fulfilled' || results[i].value !== true);
+    if (failed.length) {
+      throw new Error(`Failed to save theme INI files: ${failed.map(([name]) => name).join(', ')}`);
+    }
     return true;
 
   } catch (error) {
