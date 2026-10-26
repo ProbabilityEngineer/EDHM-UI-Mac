@@ -37,6 +37,11 @@ const packagerConfig = {
     }
   } : {}),
   ...(isMac ? {
+    // Display branding is separate from the stable package productName used
+    // by Electron's existing storage and Keychain service.
+    name: 'EDHM-UI for Mac',
+    appBundleId: 'com.electron.edhm-ui-mac',
+    helperBundleId: 'com.electron.edhm-ui-mac.helper',
     osxSign: {
       identity: 'Developer ID Application: Samuel Collins (KYS7QZNSJH)',
       entitlements: path.join(__dirname, 'entitlements.mac.plist'),

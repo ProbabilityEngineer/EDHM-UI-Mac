@@ -1,16 +1,16 @@
-# EDHM-UI-Mac
+# EDHM-UI for Mac
 
-EDHM-UI-Mac is an independent macOS/CrossOver fork of [EDHM-UI](https://github.com/BlueMystical/EDHM_UI), the configuration and theme manager for [EDHM](https://github.com/psychicEgg/EDHM) in Elite Dangerous.
+**EDHM-UI for Mac** is an independent macOS/CrossOver fork of [EDHM_UI](https://github.com/BlueMystical/EDHM_UI), the configuration and theme manager for [EDHM](https://github.com/psychicEgg/EDHM) in Elite Dangerous. The repository remains named **EDHM-UI-Mac**.
 
-It is intended for **macOS users running the Windows game through CrossOver**. EDHM-UI-Mac itself runs natively on macOS; it is not installed or run inside the Wine prefix (CrossOver bottle). It is not an official upstream macOS release.
+It is intended for **macOS users running the Windows game through CrossOver**. EDHM-UI for Mac itself runs natively on macOS; it is not installed or run inside the Wine prefix (CrossOver bottle). It is not an official upstream macOS release.
 
-![EDHM-UI-Mac running natively on macOS](static/preview.jpg)
+![EDHM-UI running natively on macOS (before the 3.1.5 display-name change)](static/preview.jpg)
 
 > **Using EDHM with CrossOver Preview on Apple Silicon?** [Download the experimental ARM64EC DXMT package.](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/dxmt-arm64ec-50102f99-nvext) It is for ARM/FEX bottles and installs into a separate CrossOver app copy.
 
 ## Release parity and provenance
 
-The **[3.1.4 release](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/macos-v3.1.4)** selectively integrates upstream EDHM-UI fixes reviewed through commit `b31f65a` (v3.0.74 era) and bundles Odyssey EDHM **v22.04** for the Anaconda Mk II game update. Version **3.1.3** remains available with EDHM v22.02 for rollback. macOS/CrossOver paths, themes, TPMods, native UI, and signed/notarized packaging are preserved.
+The **[3.1.5 release](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases/tag/macos-v3.1.5)** renames the app to **EDHM-UI for Mac** and retains the refreshed 3.1.4 audit fixes. It selectively integrates upstream EDHM_UI fixes reviewed through commit `b31f65a` (v3.0.74 era) and bundles Odyssey EDHM **v22.04** for the Anaconda Mk II game update. Version **3.1.3** remains available with EDHM v22.02 for rollback. macOS/CrossOver paths, themes, TPMods, native UI, and signed/notarized packaging are preserved.
 
 The product branch is [`macos`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/macos); [`main`](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/tree/main) mirrors upstream EDHM-UI. This repository is a fork/adaptation, not an official upstream macOS release. Upstream project and mod credits remain with [Blue Mystic](https://github.com/BlueMystical), [psychicEgg](https://github.com/psychicEgg), and the EDHM contributors.
 
@@ -18,15 +18,20 @@ The product branch is [`macos`](https://github.com/ProbabilityEngineer/EDHM-UI-M
 
 Download the ZIP for your Mac from the [GitHub Releases](https://github.com/ProbabilityEngineer/EDHM-UI-Mac/releases):
 
-- **Universal** — Apple Silicon and Intel Macs (recommended)
-- **arm64** — Apple Silicon Macs
+- **arm64** — Apple Silicon Macs (M-series)
+- **x64** — Intel Macs
 
-The refreshed 3.1.4 **arm64 and universal** downloads include the audit follow-up
-fixes and graceful handling of missing EDHM settings (source `f47e401`).
-Intel users should choose universal; the redundant standalone x64 download
-has been removed from 3.1.4. Intel hardware testing remains separate.
+Version 3.1.5 provides separate architecture-specific downloads rather than a
+universal ZIP. The arm64 build is launch-tested locally; x64 packaging, signing,
+and notarization are verified, but Intel hardware testing remains separate.
+The older 3.1.4 universal release remains available.
 
-Releases are Developer ID signed, Apple-notarized, and stapled. After unzipping, move the app to Applications and open it normally in Finder.
+Releases are Developer ID signed, Apple-notarized, and stapled. After unzipping,
+move **EDHM-UI for Mac.app** to Applications and open it normally in Finder.
+Quit the old **EDHM-UI-Mac.app** before upgrading. The new name does not change
+the bundle identifier, Electron storage identity, settings, themes, or cache
+paths. Keep only the desired app copy in Applications to avoid launching the
+old version accidentally.
 
 ## Requirements
 
@@ -39,16 +44,16 @@ Releases are Developer ID signed, Apple-notarized, and stapled. After unzipping,
 
 | Component | Location |
 |---|---|
-| EDHM-UI-Mac application | Native macOS app, outside the bottle |
+| EDHM-UI for Mac application | Native macOS app, outside the bottle |
 | Elite Dangerous | Windows executable inside the CrossOver bottle |
 | EDHM files and DLLs | The Elite game directory inside `drive_c` |
-| EDHM-UI-Mac settings/themes | `~/Library/Application Support/EDHM-UI-V3` |
-| EDHM-UI-Mac cache/temp files | `~/Library/Caches/EDHM-UI-V3` |
+| EDHM-UI for Mac settings/themes | `~/Library/Application Support/EDHM-UI-V3` |
+| EDHM-UI for Mac cache/temp files | `~/Library/Caches/EDHM-UI-V3` |
 
 ## First-time setup
 
 1. Install and launch Elite Dangerous through CrossOver once.
-2. Launch the native EDHM-UI app.
+2. Launch the native EDHM-UI for Mac app.
 3. Open **Settings**.
 4. Set the following independently:
    - **Game folder** — the folder containing `EliteDangerous64.exe` inside the bottle.
@@ -68,7 +73,7 @@ Do not assume this exact path; select the path belonging to your own bottle.
 ## Install EDHM
 
 1. Close Elite Dangerous.
-2. In EDHM-UI-Mac, select the configured game instance.
+2. In EDHM-UI for Mac, select the configured game instance.
 3. Choose **Install EDHM**.
 4. Confirm the CrossOver bottle and game paths.
 5. The installer copies the bundled EDHM files, creates the required CrossOver-safe links for `EDHM-ini` and `ShaderFixes`, installs themes, and configures the CrossOver DLL overrides when possible.
@@ -84,14 +89,14 @@ d3d11            native,builtin
 d3dcompiler_47  native,builtin
 ```
 
-EDHM-UI-Mac can configure these from the EDHM DLL override control in Settings. Restart CrossOver/Elite after changing them. These are bottle-level settings and may affect other Windows programs in that bottle; uninstalling EDHM does not remove them automatically.
+EDHM-UI for Mac can configure these from the EDHM DLL override control in Settings. Restart CrossOver/Elite after changing them. These are bottle-level settings and may affect other Windows programs in that bottle; uninstalling EDHM does not remove them automatically.
 
 The tested working renderer is **DXMT**. D3DMetal may launch Elite, but EDHM themes did not apply reliably and could crash in the tested bottle. Steam/Epic launcher combinations and other CrossOver bottles still need separate validation.
 
 ## Using themes and TPMods
 
 - Start Elite and leave it at the menus when testing setup.
-- Select a theme in EDHM-UI-Mac and choose **Apply Theme**.
+- Select a theme in EDHM-UI for Mac and choose **Apply Theme**.
 - Theme selection supports mouse and keyboard navigation: Arrow keys, Home, End, and Enter.
 - The app now reports EDHM status and can enable/disable the paired EDHM proxy DLLs without uninstalling the mod.
 - Install TPMods from the TPMods manager after EDHM has been installed for the selected game instance.

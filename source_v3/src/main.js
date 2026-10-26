@@ -180,11 +180,12 @@ async function Start() {
       // cross-platform menu, while macOS users also get the standard
       // Settings… command in the application menu (⌘,).
       if (process.platform === 'darwin') {
+        app.setAboutPanelOptions({ applicationName: 'EDHM-UI for Mac' });
         const applicationMenu = Menu.buildFromTemplate([
           {
-            label: app.name,
+            label: 'EDHM-UI for Mac',
             submenu: [
-              { role: 'about' },
+              { role: 'about', label: 'About EDHM-UI for Mac' },
               { type: 'separator' },
               {
                 label: 'Settings…',
@@ -195,11 +196,11 @@ async function Start() {
               { type: 'separator' },
               { role: 'services' },
               { type: 'separator' },
-              { role: 'hide' },
+              { role: 'hide', label: 'Hide EDHM-UI for Mac' },
               { role: 'hideOthers' },
               { role: 'unhide' },
               { type: 'separator' },
-              { role: 'quit' }
+              { role: 'quit', label: 'Quit EDHM-UI for Mac' }
             ]
           },
           { label: 'File', role: 'fileMenu' },
@@ -309,6 +310,10 @@ const createWindow = () => {
   });
 
   console.log('App is Loading..');
+  if (process.platform === 'darwin') {
+    mainWindow.setTitle('EDHM-UI for Mac');
+    mainWindow.on('page-title-updated', event => event.preventDefault());
+  }
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -432,7 +437,7 @@ const createTray = () => {
     ]);
 
     tray.setContextMenu(contextMenu);
-    tray.setToolTip('EDHM-UI-Mac');
+    tray.setToolTip(process.platform === 'darwin' ? 'EDHM-UI for Mac' : 'EDHM-UI-Mac');
 
     // Add the double-click event listener
     tray.on('double-click', () => {
